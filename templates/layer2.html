@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Trial 2: The Tribal Seals{% endblock %}
+
+{% block content %}
+<h1>🔥 TRIAL 2: THE TRIBAL SEALS 🔥</h1>
+
+<div class="story">
+    <h2 style="color: #ff6600; margin-bottom: 15px;">Devaratha's Scattered Legacy</h2>
+    <p>
+        When Devaratha Raisaar ruled Khansaar, he united fourteen warring tribes under his iron fist. 
+        To ensure his legacy would only be claimed by a worthy successor, he fragmented his seal across 
+        all fourteen tribes—each holding a piece of his name, his power, his throne.
+    </p>
+
+    <p style="margin-top: 15px; font-weight: bold; color: #ffcc00;">
+        "Salaar... only the strongest can unite what has been broken."
+    </p>
+</div>
+
+<div class="challenge-box">
+    <h3 style="color: #ff6600; margin-bottom: 15px;">📦 The Fourteen Tribal Archives</h3>
+    
+    <p style="margin-bottom: 15px;">
+        Download the tribal archives below. Inside you will find 14 ZIP files (flag00.zip to flag13.zip), 
+        each protected by a password. But here's the secret of Khansaar: sometimes the smallest files 
+        hide the greatest secrets.
+    </p>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="/download/flag_parts.zip" class="download-btn" style="font-size: 18px; padding: 20px 40px;">
+            📦 DOWNLOAD TRIBAL ARCHIVES 📦
+        </a>
+    </div>
+</div>
+
+
+<div class="challenge-box">
+    <h3 style="color: #ff6600;">🔐 Unite the Tribes</h3>
+    <p>Once you've extracted and united all 14 fragments, submit the complete seal:</p>
+    <input type="text" id="answer" placeholder="Enter the complete flag: CTF{...}" />
+    <button onclick="submitAnswer()" style="margin-top: 10px;">UNITE THE TRIBES</button>
+    <div id="message"></div>
+</div>
+
+
+<div style="text-align: center; margin-top: 20px;">
+    <a href="/" class="download-btn">⬅️ Back to Trials</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function submitAnswer() {
+    const answer = $('#answer').val().trim();
+    
+    if (!answer) {
+        showMessage('The tribes await your answer!', 'error');
+        return;
+    }
+    
+    $.ajax({
+        url: '/api/layer2/submit',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ answer: answer }),
+        success: function(response) {
+            if (response.success) {
+                showMessage(response.message, 'success');
+                setTimeout(function() {
+                    $('#message').append(`
+                        <div class="flag" style="margin-top: 20px;">
+                            🎯 TRIAL 2 COMPLETE 🎯<br/>
+                            <span style="font-size: 0.8em; margin-top: 10px; display: block;">
+                                The tribes bow before you!<br/>
+                                Unlock Code: ${response.flag}
+                            </span>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px;">
+                            <a href="${response.next_layer}">
+                                <button style="font-size: 18px;">
+                                    ⚔️ PROCEED TO FINAL TRIAL ⚔️
+                                </button>
+                            </a>
+                        </div>
+                    `);
+                }, 500);
+            } else {
+                showMessage(response.message, 'error');
+            }
+        },
+        error: function(xhr) {
+            if (xhr.status === 403) {
+                showMessage('Complete the previous trial first!', 'error');
+            } else {
+                showMessage('An error occurred. Try again.', 'error');
+            }
+        }
+    });
+}
+
+function showMessage(msg, type) {
+    $('#message').html(`<div class="message ${type}">${msg}</div>`);
+}
+
+$('#answer').keypress(function(e) {
+    if (e.which === 13) {
+        submitAnswer();
+    }
+});
+</script>
+{% endblock %}

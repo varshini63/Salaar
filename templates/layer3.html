@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Trial 3: The Final Transmission{% endblock %}
+
+{% block content %}
+<h1>👑 TRIAL 3: THE FINAL TRANSMISSION 👑</h1>
+
+<div class="story">
+    <h2 style="color: #ff6600; margin-bottom: 15px;">The Throne's Last Guardian</h2>
+    <p>
+        You stand before the throne of Khansaar. The vault is open. The tribes are united. But one final 
+        challenge remains—the throne itself speaks, testing whether you are truly worthy to rule.
+    </p>
+    <p style="margin-top: 15px; font-weight: bold; color: #ffcc00;">
+        "The throne does not choose the powerful... it chooses those who understand its voice."
+    </p>
+</div>
+
+<div class="challenge-box">
+    <h3 style="color: #ff6600; margin-bottom: 15px;">📻 The Khansaar Transmission</h3>
+    
+    <p style="margin-bottom: 15px;">
+        Download the audio transmission from the throne. Within its tones lies the final key to your coronation. 
+        Listen carefully... or better yet, decode it.
+    </p>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="/download/khansaar_transmission.wav" class="download-btn" style="font-size: 18px; padding: 20px 40px;">
+            🎵 DOWNLOAD TRANSMISSION 🎵
+        </a>
+    </div>
+    
+    <div style="background: rgba(0, 0, 0, 0.5); padding: 20px; border-radius: 5px; margin: 20px 0;">
+        <h4 style="color: #ffcc00; margin-bottom: 10px;">Audio Player:</h4>
+        <audio controls style="width: 100%; margin-top: 10px;">
+            <source src="/download/khansaar_transmission.wav" type="audio/wav">
+            Your browser does not support audio playback.
+        </audio>
+    </div>
+</div>
+
+
+<div class="code-block">
+    <h4 style="color: #00ff00; margin-bottom: 10px;">Example Decoding Process:</h4>
+    <pre style="color: #00ff00;">
+
+    </pre>
+</div>
+
+<div class="challenge-box">
+    <h3 style="color: #ff6600;">👑 Claim the Throne</h3>
+    <p>Submit the decoded message to prove your worthiness:</p>
+    <input type="text" id="answer" placeholder="Enter the decoded message: CTF{...}" />
+    <button onclick="submitAnswer()" style="margin-top: 10px;">CLAIM THE THRONE</button>
+    <div id="message"></div>
+</div>
+
+
+
+<div style="text-align: center; margin-top: 20px;">
+    <a href="/" class="download-btn">⬅️ Back to Trials</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function submitAnswer() {
+    const answer = $('#answer').val().trim();
+    
+    if (!answer) {
+        showMessage('The throne awaits your answer!', 'error');
+        return;
+    }
+    
+    $.ajax({
+        url: '/api/layer3/submit',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ answer: answer }),
+        success: function(response) {
+            if (response.success) {
+                showMessage(response.message, 'success');
+                setTimeout(function() {
+                    $('#message').append(`
+                        <div class="flag" style="margin-top: 20px; font-size: 2em; animation: pulse 2s infinite;">
+                            👑 KHANSAAR IS YOURS 👑<br/>
+                            <span style="font-size: 0.6em; margin-top: 20px; display: block; color: #00ff00;">
+                                FINAL FLAG: ${response.final_flag}
+                            </span>
+                        </div>
+                        <div style="margin-top: 30px; padding: 20px; background: rgba(255, 102, 0, 0.2); border: 2px solid #ff6600; border-radius: 10px;">
+                            <h3 style="color: #ffcc00;">Congratulations, Ruler of Khansaar!</h3>
+                            <p style="margin-top: 15px; line-height: 1.8;">
+                                You have proven yourself worthy. Deva's vault is open, the tribes bow before you, 
+                                and the throne acknowledges your strength. The warzone now recognizes you as 
+                                its supreme leader. In Khansaar, power is everything—and you have seized it all.
+                            </p>
+                            <p style="margin-top: 15px; font-weight: bold; color: #ff6600;">
+                                "Khansaar ni vaadiki raavali ante... gunde undali!"<br/>
+                                
+                            </p>
+                        </div>
+                    `);
+                }, 500);
+            } else {
+                showMessage(response.message, 'error');
+            }
+        },
+        error: function(xhr) {
+            if (xhr.status === 403) {
+                showMessage('Complete the previous trials first!', 'error');
+            } else {
+                showMessage('An error occurred. Try again.', 'error');
+            }
+        }
+    });
+}
+
+function showMessage(msg, type) {
+    $('#message').html(`<div class="message ${type}">${msg}</div>`);
+}
+
+$('#answer').keypress(function(e) {
+    if (e.which === 13) {
+        submitAnswer();
+    }
+});
+</script>
+
+<style>
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+</style>
+{% endblock %}

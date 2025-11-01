@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Trial 1: Deva's Vault{% endblock %}
+
+{% block content %}
+<h1>⚔️ TRIAL 1: DEVA'S VAULT ⚔️</h1>
+
+<div class="story">
+    <h2 style="color: #ff6600; margin-bottom: 15px;">The Vault of Secrets</h2>
+    <p>
+        Before Deva left Khansaar, he sealed his most precious treasure in a vault protected by 
+        Shamir's Secret Sharing scheme—a mathematical puzzle so complex that only the sharpest minds 
+        could unlock it.
+    </p>
+    <p style="margin-top: 15px;">
+        The vault's key was split into multiple shares and scattered across Khansaar. But time and betrayal 
+        have corrupted these shares—they've been hashed, scrambled, and hidden. Your first trial is to recover 
+        these coordinates, reconstruct the polynomial, and extract the secret value a₀.
+    </p>
+    <p style="margin-top: 15px; font-weight: bold; color: #ffcc00;">
+        "Power in Khansaar belongs to those who can see beyond the obvious..."
+    </p>
+</div>
+
+<div class="challenge-box">
+    <h3 style="color: #ff6600; margin-bottom: 15px;">📊 The Corrupted Coordinates</h3>
+    
+    <p style="margin-bottom: 15px;">The vault's coordinates have been protected with MD5 hashing. Below are the hashed Y-values:</p>
+    
+    <table id="hashTable">
+        <thead>
+            <tr>
+                <th>Point</th>
+                <th>X-Value</th>
+                <th>Y-Value (MD5 Hash)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Point 1</td>
+                <td>1</td>
+                <td id="hash1" style="font-family: monospace; font-size: 12px;">Loading...</td>
+            </tr>
+            <tr>
+                <td>Point 2</td>
+                <td>2</td>
+                <td id="hash2" style="font-family: monospace; font-size: 12px;">Loading...</td>
+            </tr>
+            <tr>
+                <td>Point 3</td>
+                <td>3</td>
+                <td id="hash3" style="font-family: monospace; font-size: 12px;">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<div class="challenge-box">
+    <h3 style="color: #ff6600;">🔐 Unlock the Vault</h3>
+    <p>Enter the secret value (a₀) to unlock Deva's vault:</p>
+    <input type="text" id="answer" placeholder="Enter a₀ value (numbers only)" />
+    <button onclick="submitAnswer()" style="margin-top: 10px;">UNLOCK VAULT</button>
+    <div id="message"></div>
+</div>
+
+<div style="text-align: center; margin-top: 20px;">
+    <a href="/" class="download-btn">⬅️ Back to Trials</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Load hashes
+    $.get('/api/layer1/hashes', function(data) {
+        $('#hash1').text(data.y1);
+        $('#hash2').text(data.y2);
+        $('#hash3').text(data.y3);
+    });
+});
+
+function submitAnswer() {
+    const answer = $('#answer').val().trim();
+    
+    if (!answer) {
+        showMessage('Enter the secret value!', 'error');
+        return;
+    }
+    
+    $.ajax({
+        url: '/api/layer1/submit',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ answer: answer }),
+        success: function(response) {
+            if (response.success) {
+                showMessage(response.message, 'success');
+                setTimeout(function() {
+                    $('#message').append(`
+                        <div class="flag" style="margin-top: 20px;">
+                            🎯 TRIAL 1 COMPLETE 🎯<br/>
+                            <span style="font-size: 0.8em; margin-top: 10px; display: block;">
+                                Flag Fragment: ${response.flag}
+                            </span>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px;">
+                            <a href="${response.next_layer}">
+                                <button style="font-size: 18px;">
+                                    ⚔️ PROCEED TO TRIAL 2 ⚔️
+                                </button>
+                            </a>
+                        </div>
+                    `);
+                }, 500);
+            } else {
+                showMessage(response.message, 'error');
+            }
+        },
+        error: function() {
+            showMessage('An error occurred. Try again.', 'error');
+        }
+    });
+}
+
+function showMessage(msg, type) {
+    $('#message').html(`<div class="message ${type}">${msg}</div>`);
+}
+
+$('#answer').keypress(function(e) {
+    if (e.which === 13) {
+        submitAnswer();
+    }
+});
+</script>
+{% endblock %}

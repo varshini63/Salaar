@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: khansaar-ctf
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+      python3 create_zip_challenge.py
+      python3 create_dtmf_wav_fixed.py
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: FLASK_ENV
+        value: production
